@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@v2.2.0/dist/tesseract.min.js"></script>
+    <script>
+      async function recognize() {
+        // Access the camera
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
+        const video = document.getElementById("video");
+        video.srcObject = stream;
+
+        // Create a canvas to capture the image
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const context = canvas.getContext("2d");
+        context.drawImage(video, 0, 0);
+
+        // Stop the camera stream
+        stream.getTracks().forEach((track) => track.stop());
+
+        // Recognize the text using Tesseract.js
+        const imageData = context.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+        const tesseract = await Tesseract.create({
+          workers: 2,
+          lang: "eng",
+        });
+        const result = await tesseract.recognize(imageData);
+        console.log(result.text);
+      }
+    </script>
+  </head>
+  <body>
+    <video id="video" width="640" height="480"></video>
+    <br />
+    <button onclick="recognize()">Recognize Text</button>
+  </body>
+</html>
